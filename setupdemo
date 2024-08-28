@@ -1,0 +1,33 @@
+#!/bin/sh
+
+# A simple script to set up a sample
+# COBOL program for experimenting.
+#
+# The script will:
+#  - create a dataset hlq.SAMPLE.COBOL, where
+#    hlq is your userid
+#  - copy the IBM provided sample IGYTSALE 
+#    into your dataset
+#  - create a sample JCL to compile and link your sample
+#  - setup other datasets for listings, object decks, and
+#    the program (load module).
+# 
+
+mlq='SAMPLE'
+hlq=$(hlq)
+pgm='IGYTSALE'
+
+cobol_src='IGY.V6R4M0.SIGYSAMP'
+jcl_tgt="${hlq}.${mlq}.JCL"
+cobol_tgt="${hlq}.${mlq}.COBOL"
+obj_tgt="${hlq}.${mlq}.OBJ"
+list_tgt="${hlq}.${mlq}.LISTING"
+load_tgt="${hlq}.${mlq}.LOAD"
+
+dtouch "${cobol_tgt}" 2>/dev/null
+dtouch "${jcl_tgt}" 2>/dev/null
+dtouch "${obj_tgt}" 2>/dev/null
+dtouch -l 137 "${list_tgt}" 2>/dev/null
+dtouch -u "${load_tgt}" 2>/dev/null
+
+dcp "${cobol_src}(IGYTSALE)" "${cobol_tgt}(IGYTSALE)"
