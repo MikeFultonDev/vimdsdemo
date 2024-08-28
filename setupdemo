@@ -16,18 +16,49 @@
 mlq='SAMPLE'
 hlq=$(hlq)
 pgm='IGYTSALE'
+ccjcl='IGYWC'
+lkjcl='IGYWCL'
+gojcl='IGYWCLG'
 
 cobol_src='IGY.V6R4M0.SIGYSAMP'
+copy_src='IGY.V6R4M0.SIGYSAMP'
+proc_src='IGY.V6R4M0.SIGYPROC'
+data_src='IGY.V6R4M0.SIGYSAMP'
 jcl_tgt="${hlq}.${mlq}.JCL"
 cobol_tgt="${hlq}.${mlq}.COBOL"
+copy_tgt="${hlq}.${mlq}.COPY"
 obj_tgt="${hlq}.${mlq}.OBJ"
 list_tgt="${hlq}.${mlq}.LISTING"
 load_tgt="${hlq}.${mlq}.LOAD"
 
 dtouch "${cobol_tgt}" 2>/dev/null
+dtouch "${copy_tgt}" 2>/dev/null
 dtouch "${jcl_tgt}" 2>/dev/null
 dtouch "${obj_tgt}" 2>/dev/null
-dtouch -l 137 "${list_tgt}" 2>/dev/null
-dtouch -u "${load_tgt}" 2>/dev/null
+dtouch -l 133 -r fb "${list_tgt}" 2>/dev/null
+dtouch -r u "${load_tgt}" 2>/dev/null
 
 dcp "${cobol_src}(IGYTSALE)" "${cobol_tgt}(IGYTSALE)"
+dcp "${copy_src}(IGYTCRC)" "${copy_tgt}(IGYTCRC)"
+dcp "${copy_src}(IGYTPRC)" "${copy_tgt}(IGYTPRC)"
+dcp "${copy_src}(IGYTSRC)" "${copy_tgt}(IGYTSRC)"
+
+jcl_template="//${hlq}A JOB 
+//PROCS JCLLIB ORDER=(${proc_src})
+//CLG EXEC IGYWCLG
+//COBOL.SYSIN    DD DSN=${cobol_tgt}(${pgm}),DISP=SHR
+//COBOL.SYSLIN   DD DSN=${obj_tgt}(${pgm}),DISP=SHR
+//COBOL.SYSLIB   DD DSN=${copy_tgt},DISP=SHR
+//COBOL.SYSPRINT DD DSN=${list_tgt}(${pgm}),DISP=SHR
+//LKED.SYSLIN    DD DSN=${obj_tgt}(${pgm}),DISP=SHR
+//LKED.SYSLMOD   DD DSN=${load_tgt}(${pgm}),DISP=SHR
+//GO.SYSOUT DD SYSOUT=*
+//GO.IGYTABLE DD DSN=${data_src}(IGYTABLE),DISP=SHR
+//GO.IGYTRANS DD DSN=${data_src}(IGYTRANA),DISP=SHR
+//GO.IGYPRINT DD SYSOUT=*,DCB=BLKSIZE=133
+//GO.IGYPRT2 DD SYSOUT=*,DCB=BLKSIZE=133"
+
+decho "${jcl_template}" "${jcl_tgt}(IGYTSALE)"
+
+echo "The following datasets have been created for you:"
+dls "${hlq}.${mlq}.*"

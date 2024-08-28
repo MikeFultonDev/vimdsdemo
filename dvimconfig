@@ -1,0 +1,23 @@
+#
+# Meant to be sourced
+#
+alias vi='vim'
+
+#
+# dvim takes a pds and member name and
+# then changes the syntax to pass to vim
+#
+function dvim()
+{
+  vim "//'$1($2)'"
+}
+
+#
+# mysub saves the job number into the
+# MYJOB env var to make it easier to use
+#
+function mysub()
+{
+  job=$(jsub $1)
+  export MYJOB=$job
+}
