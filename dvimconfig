@@ -18,6 +18,8 @@ function dvim()
 #
 function mysub()
 {
-  job=$(jsub $1)
+  out=$(submit $1)
+  job=$(echo "${out}" | awk '{ print $2; }')
   export MYJOB=$job
+  echo "MYJOB exported to $job"
 }
